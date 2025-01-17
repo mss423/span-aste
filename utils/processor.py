@@ -159,7 +159,8 @@ class Res15DataProcessor(DataProcessor):
         with open(file_path, "r", encoding="utf8") as f:
             data = f.readlines()
             for d in data:
-                text, label = d.strip().split("####")
+                # text, label = d.strip().split("####")
+                text, label = d.strip().split("#### #### ####")
                 row = {"text": text, "labels": eval(label)}
                 lines.append(row)
         return lines
