@@ -206,7 +206,7 @@ class SyntheticDataProcessor(DataProcessor):
         aste_idx_file = os.path.join(data_dir, "downsample", method + "_subsample_idx.pkl")
         aste_idx_dict = load_idx_dict(aste_idx_file)
         K_idx = aste_idx_dict[K]
-        return lines[K_idx]
+        return [lines[i] for i in K_idx]
 
     def _create_examples(self, lines, set_type):
         """Creates examples for the training and dev sets."""
