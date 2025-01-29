@@ -200,7 +200,7 @@ class SyntheticDataProcessor(DataProcessor):
         return start_offset, end_offset
 
     def get_k_sample(self, data_dir, K, method):
-        lines = self._read_txt(os.path.join(data_dir, "syn_train.txt"))
+        lines = self._read_txt(os.path.join(data_dir, "train_triplets.txt"))
         if method == "random":
             return random.sample(lines, K)
         aste_idx_file = os.path.join(datadir, "downsample", method + "_subsample_idx.pkl")
