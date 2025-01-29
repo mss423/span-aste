@@ -25,11 +25,12 @@ class CustomDataset(Dataset):
                  data_dir: "Text",
                  processor: "DataProcessor",
                  tokenizer: "BertTokenizer",
-                 max_seq_length: "int"
+                 max_seq_length: "int",
                  ) -> "None":
         self.max_seq_length = max_seq_length
         self.tokenizer = tokenizer
         self.sentence_list = []
+
         if data_type == 'train':
             examples = processor.get_train_examples(data_dir)
         elif data_type == 'dev':

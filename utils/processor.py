@@ -11,9 +11,16 @@
 import copy
 import json
 import os
+import pickle
+
+import random
 
 from utils.tager import SentimentTriple, SentenceTagger
 
+def load_idx_dict(path):
+  with open(path, "rb") as f:
+    idx_dict = pickle.load(f)
+  return idx_dict
 
 class InputExample(object):
     """A single training/test example for token classification."""
@@ -109,6 +116,97 @@ class Res15DataProcessor(DataProcessor):
         curr_len = len(self.tokenizer.encode(curr_text)[1:-1])  # 去掉101、102
         end_offset = start_offset + curr_len
         return start_offset, end_offset
+
+    def _create_examples(self, lines, set_type):
+        """Creates examples for the training and dev sets."""
+        examples = []
+        for (i, line) in enumerate(lines):
+            guid = "%s-%s" % (set_type, i)
+            text = line["text"]
+            tokens = text.split()
+            labels = line["labels"]
+            inputs = self.tokenizer.encode_plus(text, max_length=self.max_length, padding='max_length', truncation=True)
+            sentiment_triples = []
+            for label in labels:
+                aspecet, opinion, sentiment = label
+                if len(aspecet) == 1:
+                    aspecet = aspecet * 2
+                elif len(aspecet) > 2:
+                    aspecet = [aspecet[0], aspecet[-1]]
+                else:
+                    pass
+                if len(opinion) == 1:
+                    opinion = opinion * 2
+                elif len(opinion) > 2:
+                    opinion = [opinion[0], opinion[-1]]
+                else:
+                    pass
+                a1, a2 = aspecet
+                o1, o2 = opinion
+                # fetch offsets
+                a_start_idx, a_end_idx = self.fetch_offset(" ".join(tokens[:a1]), " ".join(tokens[a1:a2 + 1]))
+                o_start_idx, o_end_idx = self.fetch_offset(" ".join(tokens[:o1]), " ".join(tokens[o1:o2 + 1]))
+
+                sentiment_triple = SentimentTriple.from_sentiment_triple(
+                    ([a_start_idx, a_end_idx], [o_start_idx, o_end_idx], sentiment))
+                sentiment_triples.append(sentiment_triple)
+
+            sentence_tagger = SentenceTagger(sentiment_triples)
+            spans, span_labels = sentence_tagger.spans
+            relations, relation_labels = sentence_tagger.relations
+
+            # BIOS
+            examples.append(
+                InputExample(guid=guid, text_a=text, spans=spans, relations=relations, span_labels=span_labels,
+                             relation_labels=relation_labels))
+        return examples
+
+    def _read_txt(self, file_path):
+        lines = []
+        with open(file_path, "r", encoding="utf8") as f:
+            data = f.readlines()
+            for d in data:
+                # text, label = d.strip().split("####")
+                text, label = d.strip().split("#### #### ####")
+                row = {"text": text, "labels": eval(label)}
+                lines.append(row)
+        return lines
+
+class SyntheticDataProcessor(DataProcessor):
+    def __init__(self, tokenizer, max_length, K, method):
+        self.tokenizer = tokenizer
+        self.max_length = max_length
+        self.K = K
+        self.method = method
+
+    def get_train_examples(self, data_dir):
+        """See base class."""
+        K_sample = self.get_k_sample(data_dir, self.K, self.method)
+        return self._create_examples(K_sample, "train")
+
+    def get_dev_examples(self, data_dir):
+        """See base class."""
+        K_sample = self.get_k_sample(data_dir, self.K, self.method)
+        return self._create_examples(K_sample, "dev")
+
+    def get_test_examples(self, data_dir):
+        """See base class."""
+        return self._create_examples(self._read_txt(os.path.join(data_dir, "test_triplets.txt")), "test")
+
+    def fetch_offset(self, pre_text, curr_text):
+        start_offset = len(self.tokenizer.encode(pre_text)[:-1])  # 去掉102
+        curr_len = len(self.tokenizer.encode(curr_text)[1:-1])  # 去掉101、102
+        end_offset = start_offset + curr_len
+        return start_offset, end_offset
+
+    def get_k_sample(self, data_dir, K, method):
+        lines = self._read_test(os.path.join(data_dir, "syn_train.txt"))
+        if method == "random":
+            return random.sample(lines, K)
+        aste_idx_file = os.path.join(datadir, "downsample", method + "_subsample_idx.pkl")
+        aste_idx_dict = load_idx_dict(aste_idx_file)
+        K_idx = aste_idx_dict[K]
+        return lines[K_idx]
 
     def _create_examples(self, lines, set_type):
         """Creates examples for the training and dev sets."""

@@ -51,7 +51,8 @@ def do_train():
     tokenizer = BertTokenizer.from_pretrained(args.bert_model)
 
     # create processor
-    processor = Res15DataProcessor(tokenizer, args.max_seq_len)
+    # processor = Res15DataProcessor(tokenizer, args.max_seq_len)
+    processor = SyntheticDataProcessor(tokenizer, args.max_seq_len, args.K, args.method)
 
     print("Loading Train & Eval Dataset...")
     # Load dataset
@@ -185,8 +186,13 @@ if __name__ == '__main__':
     parser.add_argument("--learning_rate", default=5e-5, type=float, help="The initial learning rate for AdamW.")
     parser.add_argument("--weight_decay", default=1e-2, type=float, help="The initial learning rate for AdamW.")
     parser.add_argument("--warmup_proportion", default=0.1, type=float, help="The initial learning rate for AdamW.")
-    parser.add_argument("--train_path", default="data/15res", type=str, help="The path of train set.")
-    parser.add_argument("--dev_path", default="data/15res", type=str, help="The path of dev set.")
+
+    # parser.add_argument("--train_path", default="data/15res", type=str, help="The path of train set.")
+    # parser.add_argument("--dev_path", default="data/15res", type=str, help="The path of dev set.")
+
+    parser.add_argument("--train_path", default="data/synth", type=str, help="The path of train set.")
+    parser.add_argument("--dev_path", default="data/synth", type=str, help="The path of dev set.")
+
     parser.add_argument("--save_dir", default='./checkpoint', type=str,
                         help="The output directory where the model checkpoints will be written.")
     parser.add_argument("--max_seq_len", default=128, type=int,
@@ -198,6 +204,11 @@ if __name__ == '__main__':
                         help="The interval steps to evaluate model performance.")
     parser.add_argument("--init_from_ckpt", default=None, type=str,
                         help="The path of model parameters for initialization.")
+    
+    # Additions by Max
+    parser.add_argument("--K", default=1000, type=int,
+                        help="Number of samples")
+    parser.add_argument("--method", default="random", type=str,)
 
     args = parser.parse_args()
 
