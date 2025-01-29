@@ -203,7 +203,7 @@ class SyntheticDataProcessor(DataProcessor):
         lines = self._read_txt(os.path.join(data_dir, "train_triplets.txt"))
         if method == "random":
             return random.sample(lines, K)
-        aste_idx_file = os.path.join(datadir, "downsample", method + "_subsample_idx.pkl")
+        aste_idx_file = os.path.join(data_dir, "downsample", method + "_subsample_idx.pkl")
         aste_idx_dict = load_idx_dict(aste_idx_file)
         K_idx = aste_idx_dict[K]
         return lines[K_idx]
