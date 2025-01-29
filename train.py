@@ -141,7 +141,7 @@ def do_train():
 
             loss_list.append(float(loss))
             # pbar(batch_ix, {"loss": float(loss)})
-            print("")
+            # print("")
             global_step += 1
             if global_step % args.logging_steps == 0:
                 time_diff = time.time() - tic_train
