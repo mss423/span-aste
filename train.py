@@ -110,7 +110,7 @@ def do_train():
     best_f1 = 0
     loss_list = []
     for epoch in range(1, args.num_epochs + 1):
-        pbar = ProgressBar(n_total=len(train_dataloader), desc='Training')
+        # pbar = ProgressBar(n_total=len(train_dataloader), desc='Training')
         model.train()
         for batch_ix, batch in enumerate(train_dataloader):
             input_ids, attention_mask, token_type_ids, spans, relations, span_labels, relation_labels, seq_len = batch
