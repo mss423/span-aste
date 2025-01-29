@@ -24,7 +24,7 @@ from utils.dataset import CustomDataset
 from models.collate import collate_fn, gold_labels
 import numpy as np
 from models.model import SpanAsteModel
-from utils.processor import Res15DataProcessor
+from utils.processor import Res15DataProcessor, SyntheticDataProcessor
 from utils.tager import SpanLabel
 from utils.tager import RelationLabel
 from transformers import BertTokenizer, BertModel, get_linear_schedule_with_warmup
