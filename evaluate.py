@@ -56,6 +56,7 @@ def evaluate(model, metric, data_loader, device):
             gold_span_indices, gold_span_labels = gold_labels(span_indices, spans, span_labels)
             gold_relation_indices, gold_relation_labels = gold_labels(candidate_indices, relations, relation_labels)
 
+            print(relations_probability)
             num_correct, num_infer, num_label = metric.compute(relations_probability.cpu(),
                                                                torch.tensor(gold_relation_labels))
 
